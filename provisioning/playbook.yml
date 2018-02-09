@@ -1,0 +1,35 @@
+---
+- hosts: all
+  vars:
+
+  tasks:
+
+  - name: Download Jenkins Repository
+    get_url:
+      url: http://pkg.jenkins-ci.org/redhat/jenkins.repo
+      dest: /etc/yum.repos.d/jenkins.repo
+    become: true
+
+  - name: Import Jenkins Repository Key
+    rpm_key:
+      key: https://jenkins-ci.org/redhat/jenkins-ci.org.key
+      state: present
+    become: true
+    
+  - name: Install Jenkins
+    yum:
+      name: jenkins
+      state: present
+    become: true
+
+  - name: Install Java
+    yum:
+      name: java
+      state: present
+    become: true
+
+  - name: Start Jenkins
+    systemd:
+      name: jenkins
+      state: started
+    become: true
