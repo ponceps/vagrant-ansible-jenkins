@@ -1,6 +1,8 @@
 ---
 - hosts: all
+
   vars:
+    jenkins_home: /var/lib/jenkins
 
   tasks:
 
@@ -32,4 +34,30 @@
     systemd:
       name: jenkins
       state: started
+    become: true
+
+  - name: Check Jenkins installation
+    wait_for:
+      path: "{{ jenkins_home }}/secrets/master.key"
+    become: true
+
+  - name: Remove {{ jenkins_home }}/secrets/initialAdminPassword
+    file:
+      path: "{{ jenkins_home }}/secrets/initialAdminPassword"
+      state: absent
+    become: true
+
+  - name: Set user and password admin/admin
+    copy:
+      src: config.xml
+      dest: "{{ jenkins_home }}/users/admin"
+    become: true
+    notify:
+      - Restart Jenkins
+
+  handlers:
+  - name: Restart Jenkins
+    systemd:
+      name: jenkins
+      state: restarted
     become: true
